@@ -30,6 +30,8 @@ string(TOUPPER ${PMEM_BACKEND} PMEM_BACKEND)
 if(${PMEM_BACKEND} STREQUAL "PMDK")
   add_definitions(-DPMEM)
   add_definitions(-DPMDK)
+  set(PMDK_LIB_PATH "/usr/local/lib" CACHE STRING "PMDK lib install path")
+  set(PMDK_INCLUDE_PATH "/usr/local/include" CACHE STRING "PMDK include install path")
   message(STATUS "Persistence support: PMDK")
 elseif(${PMEM_BACKEND} STREQUAL "EMU")
   add_definitions(-DPMEM)
@@ -60,13 +62,14 @@ endif()
 ##################### PMwCAS #########################
 add_definitions(-DDESC_CAP=16)
 set(PMWCAS_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/pmwcas")
+
 ExternalProject_Add(PMWCAS
   PREFIX "${PMWCAS_PREFIX}"
-  GIT_REPOSITORY git@github.com:HaoPatrick/pmwcas.git
-  GIT_TAG master
+  GIT_REPOSITORY https://github.com/llersch/pmwcas
+  GIT_TAG pmdk_include_path
   INSTALL_COMMAND ""
   BUILD_COMMAND $(MAKE)
-  CMAKE_ARGS -DPMEM_BACKEND=${PMEM_BACKEND} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DDESC_CAP=16 -DBUILD_APPS=${BUILD_TESTS} -DGOOGLE_FRAMEWORK=${GOOGLE_FRAMEWORK}
+  CMAKE_ARGS -DPMEM_BACKEND=${PMEM_BACKEND} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DDESC_CAP=16 -DBUILD_APPS=${BUILD_TESTS} -DGOOGLE_FRAMEWORK=${GOOGLE_FRAMEWORK} -DPMDK_LIB_PATH=${PMDK_LIB_PATH} -DPMDK_INCLUDE_PATH=${PMDK_INCLUDE_PATH}
   LOG_DOWNLOAD ON
   LOG_CONFIGURE ON
   LOG_BUILD ON
@@ -77,6 +80,7 @@ include_directories(
   ${PMWCAS_PREFIX}/src/PMWCAS
   ${PMWCAS_PREFIX}/src/PMWCAS/src/
   ${PMWCAS_PREFIX}/src/PMWCAS/include
+  ${PMDK_INCLUDE_PATH}
 )
 link_directories(${PMWCAS_PREFIX}/src/PMWCAS-build/)
 
